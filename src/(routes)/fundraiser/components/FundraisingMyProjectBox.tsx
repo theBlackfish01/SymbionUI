@@ -31,8 +31,9 @@ const FundraisingMyProjectBox = ({
         donationManager_abi,
         signer
       );
-      setContract(contract);}
-      init();
+      setContract(contract);
+    };
+    init();
   }, []);
   const notify = () => toast.success("Project Deleted Successfully");
   const navigate = useNavigate();
@@ -54,24 +55,26 @@ const FundraisingMyProjectBox = ({
     projectId: string,
     withdrawalAmount: string
   ) => {
-    const tx = await contract.withdrawFunds(
-      projectId,
-      ethers.parseEther(withdrawalAmount)
-    );
-    toast.promise(tx.wait(), {
-      loading: "Withdrawing Ether",
-      success: "Ethers Withdrawn successfully",
-      error: (err) => `Error: ${err}`,
-    });
+    try {
+      const tx = await contract.withdrawFunds(
+        projectId,
+        withdrawalAmount.toString()
+      );
+      toast.promise(tx.wait(), {
+        loading: "Withdrawing Ether",
+        success: "Ethers Withdrawn successfully",
+        error: (err) => `Error: ${err}`,
+      });
+    } catch (err: any) {
+      console.error("Withdrawal failed:", err);
+      toast.error(`Withdrawal Error: ${err.reason || err.message}`);
+    }
   };
   const id = props.projectId;
   return (
     <div className="">
       {props.projectId != 0 ? (
-        <div
-          key={props.projectId}
-          className="text-sm bg-[#ffffff18] px-5 py-10 shadow-black rounded-lg shadow-lg m-3 text-white w-fit"
-        >
+        <div className="text-sm bg-[#ffffff18] px-5 py-10 shadow-black rounded-lg shadow-lg m-3 text-white w-fit">
           <p className="mb-2">
             <span className="font-semibold">Project ID:</span> {props.projectId}
           </p>
@@ -91,10 +94,19 @@ const FundraisingMyProjectBox = ({
             <span className="font-semibold">Amount Raised:</span>{" "}
             {props.amountRaised} ETH
           </p>
-          <input className='px-3 py-2 w-full mb-3 bg-transparent outline-none border-b-[1px] border-white placeholder:text-white' placeholder='Enter ethers to withdraw' type="text" onChange={((e)=> setwithdrawalAmount(e.target.value))} />
+          <input
+            className="px-3 py-2 w-full mb-3 bg-transparent outline-none border-b-[1px] border-white placeholder:text-white"
+            placeholder="Enter ethers to withdraw"
+            type="text"
+            onChange={(e) => {
+              setwithdrawalAmount(e.target.value);
+            }}
+          />
           <div className="flex gap-3">
             <button
-              onClick={() => handleWithdrawal(props.projectId.toString(), withdrawalAmount)}
+              onClick={() =>
+                handleWithdrawal(props.projectId.toString(), withdrawalAmount)
+              }
               className="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm shadow-lg shadow-gray-800 hover:bg-blue-700 transition-all duration-300"
             >
               Withdraw ETH

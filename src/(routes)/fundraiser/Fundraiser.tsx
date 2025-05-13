@@ -113,9 +113,9 @@ const Fundraiser = () => {
       <div className="w-full md:w-[60%] lg:w-[40%] bg-[#fff2] rounded-xl shadow-lg shadow-black p-5 md:p-10">
        <SmallHeading>My Projects</SmallHeading>
             <div className='flex flex-col items-center justify-center'>
-            {fundraisingProjects.map((project:fundraisingProjectType)=>{
+            {fundraisingProjects.map((project:fundraisingProjectType,idx)=>{
                 return(
-                    <div>
+                    <div key={idx}>
                         <FundraisingMyProjectBox props = {project}/>
                     </div>
                 )
