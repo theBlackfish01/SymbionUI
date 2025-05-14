@@ -44,7 +44,7 @@ const CrowdfundingProjectBox = ({ props }: { props: CrowdfundingProject }) => {
   return (
     <>
       {props.projectId != 0 ? (
-        <div className="w-full md:w-[60%] lg:w-[40%] bg-[#fff2] rounded-xl shadow-lg shadow-black p-5 md:p-10">
+        <div className="w-full bg-[#fff2] rounded-xl shadow-lg shadow-black p-5 md:p-10">
           <p>Project ID: {props.projectId}</p>
           <p>Project Wallet: {props.projectWallet}</p>
           <p>Goal Amount: {props.goalAmount / 1000000000000000000} Eth</p>
