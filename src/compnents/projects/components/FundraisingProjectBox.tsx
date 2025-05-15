@@ -46,7 +46,6 @@ const FundraisingProjectBox = ({props}: {
     });
     setAmount('')
   };
-  console.log(props.projectWallet);
   return (
     <div className="">
       {props.projectId != 0 ? (

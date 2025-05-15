@@ -51,11 +51,82 @@ const Merchant = () => {
   const [contract, setContract] = useState<any>(null); // Initialize contract as null
   const [address, setAddress] = useState("");
 
-  const [expandedProjectId, setExpandedProjectId] = useState<number | null>(null);
+  const [expandedProjectId, setExpandedProjectId] = useState<number | null>(
+    null
+  );
+
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
   // Toggle expansion of a project
   const toggleExpand = (projectId: number) => {
     setExpandedProjectId(expandedProjectId === projectId ? null : projectId);
+  };
+
+  // Transaction History Modal component
+  const TransactionHistoryModal = ({
+    open,
+    onClose,
+    transactions,
+  }: {
+    open: boolean;
+    onClose: () => void;
+    transactions: InvestmentType[];
+  }) => {
+    if (!open) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+        <div className="bg-[#232323] rounded-xl shadow-lg p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative">
+          <button
+            className="absolute top-3 right-3 text-white text-2xl hover:text-red-400"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <h2 className="text-xl font-bold mb-4 text-white">
+            Transaction History
+          </h2>
+          {transactions.length === 0 ? (
+            <p className="text-gray-300">No transactions found.</p>
+          ) : (
+            <table className="w-full text-sm text-left text-gray-200">
+              <thead>
+                <tr className="border-b border-gray-600">
+                  <th className="py-2 px-2">ID</th>
+                  <th className="py-2 px-2">Investor</th>
+                  <th className="py-2 px-2">Project ID</th>
+                  <th className="py-2 px-2">Amount (ETH)</th>
+                  <th className="py-2 px-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx, id) => {
+                  if (id === 0) return;
+                  return (
+                    <tr
+                      key={tx.investmentId}
+                      className="border-b border-gray-700 hover:bg-[#333]"
+                    >
+                      <td className="py-2 px-2">{tx.investmentId}</td>
+                      <td className="py-2 px-2">
+                        {tx.investor.slice(0, 8)}...{tx.investor.slice(-6)}
+                      </td>
+                      <td className="py-2 px-2">{tx.projectId}</td>
+                      <td className="py-2 px-2">
+                        {ethers.formatEther(BigInt(tx.amount))}
+                      </td>
+                      <td className="py-2 px-2">
+                        {tx.refundStatuse ? "Refunded" : "Not Refunded"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // Define fetch functions outside of useEffect
@@ -484,6 +555,28 @@ const Merchant = () => {
     <div className="text-white p-5 md:p-10 flex flex-col gap-5 items-center justify-center bg-[#2a2a2a]">
       <Toaster /> {/* Place Toaster here to display toasts */}
       <Heading>Merchant</Heading>
+      {/* Profile section with Transaction History button */}
+      <div className="flex items-center gap-4 mb-4 w-full justify-end">
+        <div className="bg-[#fff2] rounded-lg px-4 py-2 flex items-center gap-2">
+          <span className="font-semibold">Wallet:</span>
+          <span className="truncate max-w-[160px]">
+            {address
+              ? `${address.slice(0, 8)}...${address.slice(-6)}`
+              : "Not connected"}
+          </span>
+        </div>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition"
+          onClick={() => setIsTransactionModalOpen(true)}
+        >
+          View Transaction History
+        </button>
+      </div>
+      <TransactionHistoryModal
+        open={isTransactionModalOpen}
+        onClose={() => setIsTransactionModalOpen(false)}
+        transactions={formatedData}
+      />
       <div className="flex gap-5 w-full">
         <div className="grid grid-cols-2 gap-5 items-center justify-center w-1/2">
           {/* create a new project */}
@@ -508,7 +601,8 @@ const Merchant = () => {
               <SlidingBgButton title="Create" />
             </div>
           </div>
-          {/* start investment */}          <div className="flex flex-col w-full h-full bg-[#fff2] rounded-xl shadow-lg shadow-black p-5 md:p-10">
+          {/* start investment */}{" "}
+          <div className="flex flex-col w-full h-full bg-[#fff2] rounded-xl shadow-lg shadow-black p-5 md:p-10">
             <SmallHeading>Start Investment</SmallHeading>
             <input
               className="w-full mb-3 bg-transparent outline-none border-b-[1px] border-white p-2 text-white placeholder:text-white"
@@ -626,21 +720,32 @@ const Merchant = () => {
                     className="w-full bg-[#00000032] rounded-xl shadow-lg shadow-black p-5 md:p-5"
                   >
                     {/* Project header - always visible */}
-                    <div 
+                    <div
                       className="flex justify-between items-center cursor-pointer"
                       onClick={() => toggleExpand(project.projectId)}
                     >
                       <div>
-                        <p className="font-semibold">Project ID: {project.projectId}</p>
+                        <p className="font-semibold">
+                          Project ID: {project.projectId}
+                        </p>
                         <p className="text-sm truncate max-w-[200px]">
-                          {project.projectWallet.slice(0, 10)}...{project.projectWallet.slice(-8)}
+                          {project.projectWallet.slice(0, 10)}...
+                          {project.projectWallet.slice(-8)}
                         </p>
                       </div>
                       <div className="flex items-center">
                         <p className="mr-2">
-                          {ethers.formatEther(BigInt(project.amountRaised))}/{ethers.formatEther(BigInt(project.goalAmount))} ETH
+                          {ethers.formatEther(BigInt(project.amountRaised))}/
+                          {ethers.formatEther(BigInt(project.goalAmount))} ETH
                         </p>
-                        <span className="text-2xl transform transition-transform duration-200 ease-in-out" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                        <span
+                          className="text-2xl transform transition-transform duration-200 ease-in-out"
+                          style={{
+                            transform: isExpanded
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                          }}
+                        >
                           ▼
                         </span>
                       </div>
@@ -649,14 +754,17 @@ const Merchant = () => {
                     {/* Expandable content */}
                     {isExpanded && (
                       <div className="mt-4 border-t border-[#ffffff33] pt-4">
-                        <p className="mt-2">Project Wallet: {project.projectWallet}</p>
+                        <p className="mt-2">
+                          Project Wallet: {project.projectWallet}
+                        </p>
                         <p className="mt-2">
                           Goal Amount:{" "}
                           {ethers.formatEther(BigInt(project.goalAmount))} ETH
                         </p>
                         <p className="mt-2">
                           Merchant Deposit:{" "}
-                          {ethers.formatEther(BigInt(project.merchantDeposit))} ETH
+                          {ethers.formatEther(BigInt(project.merchantDeposit))}{" "}
+                          ETH
                         </p>
                         <p className="mt-2">
                           Amount Raised:{" "}
@@ -671,14 +779,32 @@ const Merchant = () => {
                             : "Not yet decided"}
                         </p>
                         <div className="flex mt-2 gap-2">
-                          <div className={`px-3 py-1 rounded-full text-xs ${project.investmentRoundIsActive ? 'bg-green-500' : 'bg-gray-500'}`}>
-                            Investment Round: {project.investmentRoundIsActive ? "Active" : "Inactive"}
+                          <div
+                            className={`px-3 py-1 rounded-full text-xs ${
+                              project.investmentRoundIsActive
+                                ? "bg-green-500"
+                                : "bg-gray-500"
+                            }`}
+                          >
+                            Investment Round:{" "}
+                            {project.investmentRoundIsActive
+                              ? "Active"
+                              : "Inactive"}
                           </div>
-                          <div className={`px-3 py-1 rounded-full text-xs ${project.profitDistributionIsDone ? 'bg-green-500' : 'bg-gray-500'}`}>
-                            Profit Distribution: {project.profitDistributionIsDone ? "Done" : "Pending"}
+                          <div
+                            className={`px-3 py-1 rounded-full text-xs ${
+                              project.profitDistributionIsDone
+                                ? "bg-green-500"
+                                : "bg-gray-500"
+                            }`}
+                          >
+                            Profit Distribution:{" "}
+                            {project.profitDistributionIsDone
+                              ? "Done"
+                              : "Pending"}
                           </div>
                         </div>
-                        
+
                         {/* Delete button */}
                         <div
                           className="mt-4"
@@ -690,7 +816,7 @@ const Merchant = () => {
                         >
                           <SlidingBgButton title="Delete" color="000" />
                         </div>
-                        
+
                         {/* Investments for this project */}
                         <div className="mt-4">
                           {formatedData.filter(
@@ -713,7 +839,11 @@ const Merchant = () => {
                                       <p>
                                         Investment ID: {investment.investmentId}
                                       </p>
-                                      <p>Investor: {investment.investor.slice(0, 10)}...{investment.investor.slice(-8)}</p>
+                                      <p>
+                                        Investor:{" "}
+                                        {investment.investor.slice(0, 10)}...
+                                        {investment.investor.slice(-8)}
+                                      </p>
                                       <p>
                                         Amount:{" "}
                                         {ethers.formatEther(

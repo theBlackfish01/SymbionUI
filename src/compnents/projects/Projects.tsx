@@ -334,6 +334,7 @@ const Projects = () => {
         <div className="">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {fundraisingProjects.map((project: fundraisingProjectType) => {
+              if (project.projectId === 0) return null; // Skip if projectId is 0
               const isExpanded = expandedProjectId === project.projectId;
               return (
                 <div
