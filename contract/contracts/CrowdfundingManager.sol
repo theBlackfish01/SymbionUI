@@ -30,6 +30,7 @@ contract CrowdfundingManager {
         uint256 merchantDeposit; // Amount deposited by merchant as collateral 
         bool investmentRoundActive; 
         bool profitDistributionDone;
+        bytes32 projectHash; //Hash to verify project integrity
     }
 
     struct Merchant {
@@ -174,6 +175,8 @@ contract CrowdfundingManager {
     }
 
     function addProject(address projectWallet) public onlyMerchant {
+        bytes32 hash = keccak256(abi.encodePacked(projectWallet, projectCounter));
+        
         projects[projectCounter] = RaiseProjects({
             projectId: projectCounter,
             projectWallet: projectWallet,
@@ -185,7 +188,8 @@ contract CrowdfundingManager {
             profitSharingRatio: 0,
             merchantDeposit: 0,
             investmentRoundActive: false,
-            profitDistributionDone: false
+            profitDistributionDone: false,
+            projectHash: hash
         });
 
         emit ProjectAdded(projectCounter, projectWallet);
