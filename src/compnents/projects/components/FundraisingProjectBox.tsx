@@ -46,13 +46,12 @@ const FundraisingProjectBox = ({props}: {
     });
     setAmount('')
   };
-  console.log(props.projectWallet);
   return (
     <div className="">
       {props.projectId != 0 ? (
         <div
           key={props.projectId}
-          className="md:w-[450px] lg:w-[600px] bg-[#ffffff18] px-5 py-10 shadow-black rounded-lg shadow-lg text-white w-full"
+          className="md:max-w-[450px] lg:max-w-[600px] bg-[#ffffff18] px-5 py-10 shadow-black rounded-lg shadow-lg text-white w-full"
         >
           <p className="mb-2">
             <span className="font-semibold">Project ID: </span>
